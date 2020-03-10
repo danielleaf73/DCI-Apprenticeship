@@ -2,5 +2,42 @@ Using Schema: Order Entry (OE)
 
 Questions:
 1. How much do single males spend on average?
+
+WITH ot AS ( 
+SELECT c.customer_id, AVG(order_total) AS avg_spent, COUNT(order_id) AS num_orders 
+FROM oe.customers c 
+INNER JOIN oe.orders o 
+    ON o.customer_id = c.customer_id 
+GROUP BY c.customer_id 
+) 
+
+SELECT cust_first_name, cust_last_name, ot.avg_spent AS average_spent,
+    ot.num_orders AS number_of_orders, gender, marital_status
+FROM oe.customers c 
+INNER JOIN ot 
+    ON ot.customer_id = c.customer_id 
+WHERE marital_status = 'single' 
+    AND gender = 'M' 
+ORDER BY average_spent DESC;
+
+WITH ot AS ( 
+SELECT c.customer_id, AVG(order_total) AS avg_spent, COUNT(order_id) AS num_orders 
+FROM oe.customers c 
+INNER JOIN oe.orders o 
+    ON o.customer_id = c.customer_id 
+GROUP BY c.customer_id 
+)
+
+SELECT ROUND(AVG(ot.avg_spent), 2) AS average_spent, gender, marital_status
+FROM oe.customers c 
+INNER JOIN ot 
+    ON ot.customer_id = c.customer_id 
+WHERE marital_status = 'single' 
+    AND gender = 'M' 
+GROUP BY gender, marital_status
+ORDER BY average_spent DESC;
+
+
+
 2. What products are the most popular?
 3. How much is spent on software?
