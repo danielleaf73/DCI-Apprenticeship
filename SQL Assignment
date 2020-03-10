@@ -5,7 +5,7 @@ I used the schema Order Entry (OE) to answer my 3 buisness questions. These are 
 
 
 1. How much do single males spend on average?
-First, I used subquery factoring to select the average each customer has spent. Then, I used this subquery and narrowed it further to only single males.
+First, I used subquery factoring to select the average each customer has spent. Then, I used this subquery and narrowed it further to include only single males.
 
 WITH ot AS ( 
 SELECT c.customer_id, AVG(order_total) AS avg_spent, COUNT(order_id) AS num_orders 
@@ -23,6 +23,8 @@ INNER JOIN ot
 WHERE marital_status = 'single' 
     AND gender = 'M' 
 ORDER BY average_spent DESC;
+
+I found that a customer named Markus Rampling had the highest average spending.
 
 
 The next query uses the previous subquery and finds the average spent between all single males.
@@ -44,6 +46,8 @@ WHERE marital_status = 'single'
 GROUP BY gender, marital_status
 ORDER BY average_spent DESC;
 
+I found that the average spent was 29275.01.
+
 
 
 2. Which orderable products are the most popular, and which are the least popular?
@@ -59,6 +63,8 @@ WHERE p.product_status = 'orderable'
 GROUP BY p.product_name, c.category_description
 ORDER BY number_of_orders DESC;
 
+I found that the most popular product is "KB 101/EN" in the "keyboards, mouses, mouse pads" category. It has been ordered 21 times.
+
 
 The next query gets the previous results but orders them with the least ordered product at the top.
 
@@ -71,6 +77,8 @@ LEFT JOIN oe.categories_tab c
 WHERE p.product_status = 'orderable'
 GROUP BY p.product_name, c.category_description
 ORDER BY number_of_orders;
+
+I found that there are many products that have only been ordered once, and they are in various categories.
 
 
 
@@ -90,6 +98,8 @@ WHERE c.category_name LIKE 'software%'
 GROUP BY c.category_name, c.category_description
 ORDER BY total_revenue;
 
+I found that the category with the highest revenue is "operating systems" with a revenue of 3598.10.
+
 
 The next query sums up the total for all categories.
 
@@ -103,3 +113,5 @@ LEFT JOIN oe.orders o
     ON o.order_id = oi.order_id
 WHERE c.category_name LIKE 'software%'
     AND o.order_date >= '01-JAN-07'
+
+I found that the total revenue for all software categories is 8020.70.
