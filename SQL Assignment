@@ -39,5 +39,28 @@ ORDER BY average_spent DESC;
 
 
 
-2. What products are the most popular?
+2. Which orderable products are the most and least popular?
+
+SELECT p.product_name, c.category_description, COUNT(*) AS number_of_orders
+FROM oe.product_information p
+LEFT JOIN oe.order_items oi
+    ON p.product_id = oi.product_id
+LEFT JOIN oe.categories_tab c
+    ON c.category_id = p.category_id
+WHERE p.product_status = 'orderable'
+GROUP BY p.product_name, c.category_description
+ORDER BY number_of_orders DESC;
+
+SELECT p.product_name, c.category_description, COUNT(*) AS number_of_orders
+FROM oe.product_information p
+LEFT JOIN oe.order_items oi
+    ON p.product_id = oi.product_id
+LEFT JOIN oe.categories_tab c
+    ON c.category_id = p.category_id
+WHERE p.product_status = 'orderable'
+GROUP BY p.product_name, c.category_description
+ORDER BY number_of_orders;
+
+
+
 3. How much is spent on software?
