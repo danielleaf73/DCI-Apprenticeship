@@ -11,7 +11,7 @@ INNER JOIN oe.orders o
 GROUP BY c.customer_id 
 ) 
 
-SELECT cust_first_name, cust_last_name, ot.avg_spent AS average_spent,
+SELECT cust_first_name, cust_last_name, ROUND(ot.avg_spent, 2) AS average_spent,
     ot.num_orders AS number_of_orders, gender, marital_status
 FROM oe.customers c 
 INNER JOIN ot 
