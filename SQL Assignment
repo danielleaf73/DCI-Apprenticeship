@@ -1,7 +1,11 @@
-Using Schema: Order Entry (OE)
-
-Questions:
+I used the schema Order Entry (OE) to answer my 3 buisness questions. These are the questions I answered:
 1. How much do single males spend on average?
+2. Which orderable products are the most popular, and which are the least popular?
+3. How much was did customers spend on software since 2007?
+
+
+1. How much do single males spend on average?
+First, I used subquery factoring to select the average each customer has spent. Then, I used this subquery and narrowed it further to only single males.
 
 WITH ot AS ( 
 SELECT c.customer_id, AVG(order_total) AS avg_spent, COUNT(order_id) AS num_orders 
@@ -19,6 +23,9 @@ INNER JOIN ot
 WHERE marital_status = 'single' 
     AND gender = 'M' 
 ORDER BY average_spent DESC;
+
+
+The next query uses the previous subquery and finds the average spent between all single males.
 
 WITH ot AS ( 
 SELECT c.customer_id, AVG(order_total) AS avg_spent, COUNT(order_id) AS num_orders 
@@ -39,7 +46,8 @@ ORDER BY average_spent DESC;
 
 
 
-2. Which orderable products are the most and least popular?
+2. Which orderable products are the most popular, and which are the least popular?
+Here, I joined the product_information table to the order_items table, which I used to find the number of times each product was ordered. I also joined the categories table so I could get the category for each product. I ordered the results with the highest number of orders at the top.
 
 SELECT p.product_name, c.category_description, COUNT(*) AS number_of_orders
 FROM oe.product_information p
@@ -50,6 +58,9 @@ LEFT JOIN oe.categories_tab c
 WHERE p.product_status = 'orderable'
 GROUP BY p.product_name, c.category_description
 ORDER BY number_of_orders DESC;
+
+
+The next query gets the previous results but orders them with the least ordered product at the top.
 
 SELECT p.product_name, c.category_description, COUNT(*) AS number_of_orders
 FROM oe.product_information p
@@ -63,22 +74,32 @@ ORDER BY number_of_orders;
 
 
 
-3. How much is spent on software?
+3. How much was did customers spend on software since 2007?
+For this question, I summed up the total revenue and the total quantity of products ordered from all products with "software" in their category names. I grouped it by category, and I also made sure it only added values from orders starting in 2007.
 
 SELECT c.category_name, c.category_description, SUM(oi.unit_price) AS total_revenue, SUM(oi.quantity) AS total_number
 FROM oe.categories_tab c
 LEFT JOIN oe.product_information p
-ON p.category_id = c.category_id
+    ON p.category_id = c.category_id
 LEFT JOIN oe.order_items oi
-ON oi.product_id = p.product_id
+    ON oi.product_id = p.product_id
+LEFT JOIN oe.orders o
+    ON o.order_id = oi.order_id
 WHERE c.category_name LIKE 'software%'
+    AND o.order_date >= '01-JAN-07'
 GROUP BY c.category_name, c.category_description
 ORDER BY total_revenue;
+
+
+The next query sums up the total for all categories.
 
 SELECT SUM(oi.unit_price) AS total_revenue, SUM(oi.quantity) AS total_number
 FROM oe.categories_tab c
 LEFT JOIN oe.product_information p
-ON p.category_id = c.category_id
+    ON p.category_id = c.category_id
 LEFT JOIN oe.order_items oi
-ON oi.product_id = p.product_id
-WHERE c.category_name LIKE 'software%';
+    ON oi.product_id = p.product_id
+LEFT JOIN oe.orders o
+    ON o.order_id = oi.order_id
+WHERE c.category_name LIKE 'software%'
+    AND o.order_date >= '01-JAN-07'
