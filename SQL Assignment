@@ -101,7 +101,7 @@ ORDER BY total_revenue;
 I found that the category with the highest revenue is "operating systems" with a revenue of $3,598.10.
 
 
-The next query sums up the totals for all categories.
+The next query sums up the totals for all software categories.
 
 SELECT SUM(oi.unit_price) AS total_revenue, SUM(oi.quantity) AS total_number
 FROM oe.categories_tab c
