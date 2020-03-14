@@ -1,11 +1,11 @@
 I used the schema Order Entry (OE) to answer my 3 buisness questions. These are the questions I answered:
 1. How much do single males spend on average?
 2. Which orderable products are the most popular, and which are the least popular?
-3. How much was did customers spend on software since 2007?
+3. How much did customers spend on software since 2007?
 
 
 1. How much do single males spend on average?
-First, I used subquery factoring to select the average each customer has spent. Then, I used this subquery and narrowed it further to include only single males. I used Inner Joins so that only customers who had made orders would be selected. That way no null order totals would be counted.
+First, I used a CTE to select the average each customer has spent. Then, I used this subquery and narrowed it further to include only single males. I used inner joins so that only customers who had made orders would be selected. That way no null order totals would be counted.
 
 WITH ot AS ( 
 SELECT c.customer_id, AVG(order_total) AS avg_spent, COUNT(order_id) AS num_orders 
@@ -27,7 +27,7 @@ ORDER BY average_spent DESC;
 I found that a customer named Markus Rampling had the highest average spending.
 
 
-The next query uses the previous subquery and finds the average spent between all single males. Note that, due to the Inner Join, this only counts customers who have made orders.
+The next query uses the previous subquery and finds the average spent between all single males. Note that, due to the inner join, this only counts customers who have made orders.
 
 WITH ot AS ( 
 SELECT c.customer_id, AVG(order_total) AS avg_spent, COUNT(order_id) AS num_orders 
@@ -46,12 +46,12 @@ WHERE marital_status = 'single'
 GROUP BY gender, marital_status
 ORDER BY average_spent DESC;
 
-I found that the average spent was 29275.01.
+I found that the average spent was $29,275.01.
 
 
 
 2. Which orderable products are the most popular, and which are the least popular?
-Here, I joined the product_information table to the order_items table, which I used to find the number of times each product was ordered. I also joined the categories table so I could get the category for each product. I used Left Joins so all products would be returned, not just ones that had been ordered. I ordered the results with the highest number of orders at the top.
+Here, I joined the product_information table to the order_items table, which I used to find the number of times each product was ordered. I also joined the categories table so I could get the category for each product. I used left joins so all products would be returned, not just ones that had been ordered. I ordered the results with the highest number of orders at the top.
 
 SELECT p.product_name, c.category_description, COUNT(*) AS number_of_orders
 FROM oe.product_information p
@@ -82,23 +82,23 @@ I found that there are many products that have only been ordered once, and they 
 
 
 
-3. How much was did customers spend on software since 2007?
-For this question, I summed up the total revenue and the total quantity of products ordered from all products with "software" in their category names. I grouped them by category, and I also made sure it only added values from orders starting in 2007. I used Left Joins so all categories within the time range would be counted.
+3. How much did customers spend on software since 2007?
+For this question, I summed up the total revenue and the total quantity of products ordered from all products with "software" in their category names. I grouped them by category, and I also made sure it only added values from orders starting in 2007. I used left joins so all categories within the time range would be counted.
 
 SELECT c.category_name, c.category_description, SUM(oi.unit_price) AS total_revenue, SUM(oi.quantity) AS total_number
 FROM oe.categories_tab c
 LEFT JOIN oe.product_information p
-    ON p.category_id = c.category_id
+   ON p.category_id = c.category_id
 LEFT JOIN oe.order_items oi
-    ON oi.product_id = p.product_id
+   ON oi.product_id = p.product_id
 LEFT JOIN oe.orders o
-    ON o.order_id = oi.order_id
+   ON o.order_id = oi.order_id
 WHERE c.category_name LIKE 'software%'
-    AND o.order_date >= '01-JAN-07'
+   AND EXTRACT(YEAR FROM o.order_date) >= '2007'
 GROUP BY c.category_name, c.category_description
 ORDER BY total_revenue;
 
-I found that the category with the highest revenue is "operating systems" with a revenue of 3598.10.
+I found that the category with the highest revenue is "operating systems" with a revenue of $3,598.10.
 
 
 The next query sums up the totals for all categories.
@@ -106,12 +106,12 @@ The next query sums up the totals for all categories.
 SELECT SUM(oi.unit_price) AS total_revenue, SUM(oi.quantity) AS total_number
 FROM oe.categories_tab c
 LEFT JOIN oe.product_information p
-    ON p.category_id = c.category_id
+   ON p.category_id = c.category_id
 LEFT JOIN oe.order_items oi
-    ON oi.product_id = p.product_id
+   ON oi.product_id = p.product_id
 LEFT JOIN oe.orders o
-    ON o.order_id = oi.order_id
+   ON o.order_id = oi.order_id
 WHERE c.category_name LIKE 'software%'
-    AND o.order_date >= '01-JAN-07'
+   AND EXTRACT(YEAR FROM o.order_date) >= '2007';
 
-I found that the total revenue for all software categories is 8020.70.
+I found that the total revenue for all software categories is $8,020.70.
